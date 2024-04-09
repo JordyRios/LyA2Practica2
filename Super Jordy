@@ -1,0 +1,74 @@
+package practica2;
+
+import java.util.ArrayList;
+
+public class MetodosParaProcesarLineas {
+    public static void analizar(String[] partes, ArrayList<Token> vci) {
+        String[] elementos = {"-4", "-5", "-51", "-52", "-53", "-54", "-55",
+                "-61", "-62", "-63", "-64", "-65"};
+        boolean esElemento = false;
+
+        for (int i = 0; i < elementos.length; i++) {
+            if (partes[1].equals(elementos[i])) {
+                esElemento = true;
+                break;
+            } else {
+                continue;
+            }
+        }
+
+        if (esElemento) {
+            pasarAVCI(partes, vci);
+        }
+    }
+
+
+    public static ArrayList<Token> pasarAVCI(String[] partes, ArrayList<Token> vci) {
+        Token token = new Token(partes[0], partes[1], partes[2], partes[3]);
+        vci.add(token);
+        return vci;
+    }
+
+    //Metodo Operador
+
+    public static int ObetenerPrioridad(String valorToken) {
+        int prioridad = 0;
+
+        if (valorToken.equals("-21") || valorToken.equals("-22")||valorToken.equals("-23")){
+            prioridad = 60;
+            return prioridad;
+        }
+        //OPERADORES ARITMETICOS
+        else if ( valorToken.equals("-24") || valorToken.equals("-25")){
+            prioridad = 50;
+            return prioridad;
+
+
+        }
+        else if (valorToken.equals("-26")) {
+            prioridad = 0;
+            return prioridad;
+
+        }else if (valorToken.equals("-26")) {
+            prioridad = 0;
+            return prioridad;
+
+        }
+        return 0;
+    }
+
+
+}
+
+    /* Metodo es operador
+    Metodo que recibe un token de operador y regresa la prioridad
+    que tiene en la pila operadores/*
+
+
+
+    //Metodo es estuto
+
+    //Metodo para revisar operador o estatuo
+
+
+
