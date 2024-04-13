@@ -1,0 +1,134 @@
+package practicaVCI;
+
+import java.util.ArrayList;
+import java.util.Stack;
+
+public class EstatutosMethods {
+
+    public EstatutosMethods() {
+    }
+
+    public void handleKeywords(ArrayList<Token> tablaDeTokens, ArrayList<Token> vci, Stack<Integer> direcciones) {
+        Stack<Token> estatutos = new Stack<>();
+        Stack<Token> operadores = new Stack<>();
+
+        for (int i = 0; i < tablaDeTokens.size(); i++) {
+            Token token = tablaDeTokens.get(i);
+
+            switch (token.getToken()) {
+                case "IF":
+                case "WHILE":
+                    estatutos.push(token);
+                    direcciones.push(i);
+                    break;
+
+                case "THEN":
+                    while (!operadores.isEmpty()) {
+                        operadores.pop();
+                    }
+                    direcciones.push(vci.size());
+                    vci.add(new Token("FALSO")); // Generar token FALSO
+                    vci.add(new Token("THEN"));  // Generar token THEN
+                    break;
+
+                case "ELSE":
+                    estatutos.push(token);
+                    int dir = direcciones.pop();
+                    vci.get(dir).setApuntador(vci.size() + 2); // Almacenar valor del apuntador + 2 posiciones
+                    vci.add(new Token("FALSO"));  // Generar token FALSO
+                    direcciones.push(vci.size()); // Push (dir) de la dir del VCI en pila
+                    vci.add(new Token("ELSE"));   // Generar token ELSE
+                    break;
+
+                case "END":
+                    if (!estatutos.isEmpty()) {
+                        Token last = estatutos.pop();
+                        if (last.getToken().equals("IF")) {
+                            if (i + 1 < tablaDeTokens.size() && tablaDeTokens.get(i + 1).getToken().equals("ELSE")) {
+                                i++; // Si siguiente token es un ELSE, se ignora regla del END y pasa control al ELSE
+                            } else {
+                                int dirEnd = direcciones.pop();
+                                vci.get(dirEnd).setApuntador(i);
+                            }
+                        } else if (last.getToken().equals("WHILE")) {
+                            int dirEnd = direcciones.pop();
+                            int dirVci = direcciones.pop();
+                            vci.get(dirEnd).setApuntador(dirVci);
+                            vci.add(new Token("END-WHILE")); // Genera token END-WHILE
+                        }
+                    }
+                    break;
+
+                case "DO":
+                    while (!operadores.isEmpty()) {
+                        operadores.pop();
+                    }
+                    direcciones.push(i);
+                    break;
+
+                case "REPEAT":
+                    direcciones.push(i);
+                    break;
+
+                case "UNTIL":
+                    Token tempToken = new Token("TEMP");
+                    vci.add(tempToken);
+                    int dirRepeat = direcciones.pop();
+                    vci.get(dirRepeat).setApuntador(i);
+                    vci.add(new Token("UNTIL")); // Genera token UNTIL
+                    break;
+
+                default:
+                    VciMethods vciMethods = new VciMethods();
+                    boolean itsVci = vciMethods.checkVci(token);
+                    if (itsVci) {
+                        vciMethods.moveToVci(token, vci);
+                    }
+                    break;
+            }
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+package practicaVCI;
+
+import java.util.ArrayList;
+
+/**
+ *
+ * @author edson
+ */
+public class VciMethods {
+
+    public VciMethods() {
+    }
+
+    /* Metodo que recibe un token de la tabla de token.
+    Sirve para verificar si un token se pasa directamente (o no) al vci */
+    public boolean checkVci(Token token) {
+        // Estos son los token que se pasan directamente al vci
+        String[] items = {"-4", "-5", "-51", "-52", "-53", "-54", "-55",
+                "-61", "-62", "-63", "-64", "-65"};
+
+        // Este es el retorno del metodo
+        boolean output = false;
+
+        // Toma el token y verifica si se pasa directamente (o no) al vci
+        for (int i = 0; i < items.length; i++) {
+            String tokenValue = token.getToken();
+
+            if (tokenValue.equals(items[i])) {
+                output = true;
+                break;
+            }
+        }
+
+        return output;
+    }
+
+    /* Metodo que recibe un token de la tabla de tokens y el vci.
+    Sirve para pasar un token al vci */
+    public void moveToVci (Token token, ArrayList<Token> vci) {
+        vci.add(token);
+    }
+}
